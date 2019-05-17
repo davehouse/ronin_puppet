@@ -75,3 +75,4 @@ New test suites can be added in `.kitchen.yaml`.
 1. (optional) Write spec tests.
 
 	See `tests/integration`.
+
