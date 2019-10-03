@@ -30,6 +30,7 @@ class signing_worker::base {
         /^mac-v3-signing\d+/ => 'ff-prod',
         /^tb-mac-v3-signing\d+/ => 'tb-prod',
         /^dep-mac-v3-signing\d+/ => 'dep',
+        /^t-mojave-r7-458/ => 'dep',
         default => fail('No matching hostname'),
     }
 
