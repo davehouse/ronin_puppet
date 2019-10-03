@@ -8,9 +8,9 @@ class roles_profiles::profiles::logging (
 ) {
 
     # use a single write-only service account for each project
-    $stackdriver_keyid    = lookup("stackdriver.${stackdriver_project}.keyid", {"default_value": ''})
-    $stackdriver_key      = lookup("stackdriver.${stackdriver_project}.key", {"default_value": ''})
-    $stackdriver_clientid = lookup("stackdriver.${stackdriver_project}.clientid", {"default_value": ''})
+    $stackdriver_keyid    = lookup("stackdriver.${stackdriver_project}.keyid", {"default_value" => ''})
+    $stackdriver_key      = lookup("stackdriver.${stackdriver_project}.key", {"default_value" => ''})
+    $stackdriver_clientid = lookup("stackdriver.${stackdriver_project}.clientid", {"default_value" => ''})
 
     case $::operatingsystem {
         'Windows': {
