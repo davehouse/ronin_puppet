@@ -4,7 +4,7 @@
 
 class roles_profiles::profiles::logging (
     String $worker_type         = '',  # not used by windows
-    String $stackdriver_project = '',
+    String $stackdriver_project = 'none',
 ) {
 
     # use a single write-only service account for each project
