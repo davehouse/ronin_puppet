@@ -18,7 +18,6 @@ class roles_profiles::roles::test_logger {
     include ::roles_profiles::profiles::hardware
     include ::roles_profiles::profiles::motd
     include ::roles_profiles::profiles::users
-    include ::roles_profiles::profiles::cltbld_user
     include ::roles_profiles::profiles::relops_users
     include ::roles_profiles::profiles::test_logger
     include ::fw::roles::osx_taskcluster_worker
