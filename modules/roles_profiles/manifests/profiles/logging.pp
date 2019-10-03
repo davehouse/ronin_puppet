@@ -4,13 +4,13 @@
 
 class roles_profiles::profiles::logging (
     String $worker_type         = '',  # not used by windows
-    String $stackdriver_project = 'fx-worker-logging-prod',
+    String $stackdriver_project = '',
 ) {
 
     # use a single write-only service account for each project
-    $stackdriver_keyid    = lookup("stackdriver.${stackdriver_project}.keyid")
-    $stackdriver_key      = lookup("stackdriver.${stackdriver_project}.key")
-    $stackdriver_clientid = lookup("stackdriver.${stackdriver_project}.clientid")
+    $stackdriver_keyid    = lookup("stackdriver.${stackdriver_project}.keyid", {"default_value": ''})
+    $stackdriver_key      = lookup("stackdriver.${stackdriver_project}.key", {"default_value": ''})
+    $stackdriver_clientid = lookup("stackdriver.${stackdriver_project}.clientid", {"default_value": ''})
 
     case $::operatingsystem {
         'Windows': {
@@ -34,9 +34,6 @@ class roles_profiles::profiles::logging (
         'Darwin': {
             class { 'fluentd':
                 worker_type          => $worker_type,
-                stackdriver_project  => $stackdriver_project,
-                stackdriver_keyid    => $stackdriver_keyid,
-                stackdriver_key      => $stackdriver_key,
                 stackdriver_clientid => $stackdriver_clientid,
             }
         }
