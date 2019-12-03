@@ -14,6 +14,7 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker_staging {
         workerGroup   => $worker_group,
         provisionerId => 'releng-hardware',
         workerId      => $facts['networking']['hostname'],
+        host          => $facts['networking']['hostname'],
     }
 
     case $::operatingsystem {
