@@ -13,9 +13,9 @@ class roles_profiles::profiles::gecko_3_t_osx_1014_generic_worker {
         'Darwin': {
 
             class { 'puppet::atboot':
-                puppet_repo         = 'https://github.com/davehouse/ronin_puppet.git',
-                puppet_branch       = 'bug1530732_l3-on-ffci',
-                puppet_notify_email = 'puppet-ronin-reports@mozilla.com',
+                puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
+                puppet_branch       => 'bug1530732_l3-on-ffci',
+                puppet_notify_email => 'puppet-ronin-reports@mozilla.com',
                 telegraf_user     => lookup('telegraf.user'),
                 telegraf_password => lookup('telegraf.password'),
                 # Note the camelCase key names
