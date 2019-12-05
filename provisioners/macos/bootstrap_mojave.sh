@@ -23,6 +23,7 @@ export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/puppetlabs/bin"
 # URL of puppet repo to download
 # TODO: change this url to track master on the moz platform ops org relop
 PUPPET_REPO='https://github.com/mozilla-platform-ops/ronin_puppet/archive/master.tar.gz'
+PUPPET_REPO='https://github.com/davehouse/ronin_puppet/archive/bug1530732_l3-on-ffci.tar.gz'
 
 # If something fails hard, either exit for interactive or hang for non-interactive
 function fail {
