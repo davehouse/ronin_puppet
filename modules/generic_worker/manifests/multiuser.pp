@@ -19,6 +19,7 @@ class generic_worker::multiuser (
     Pattern[/^v\d+\.\d+\.\d+$/] $livelog_version,
     String $livelog_sha256,
     String $taskcluster_host = 'taskcluster',
+    Optional[String] $ed25519_signing_key_content = undef,
 ) {
 
     include httpd
@@ -38,6 +39,16 @@ class generic_worker::multiuser (
     $downloads_dir       = "${gw_dir}/downloads"
     $ed25519_signing_key = "${gw_dir}/generic-worker.ed25519.signing.key"
 
+    if $ed25519_signing_key_content {
+        file {
+            $ed25519_signing_key:
+                ensure  => present,
+                content => $ed25519_signing_key_content,
+                mode    => '0600',
+                owner   => $::root_user,
+                group   => $::root_group,
+        }
+    }
     exec {
         'create ed25519 signing key':
             path    => ['/bin', '/sbin', '/usr/local/bin', '/usr/bin'],
