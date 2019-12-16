@@ -38,6 +38,7 @@ class roles_profiles::profiles::gecko_3_t_osx_1014_generic_worker {
             $quarantine_client_id     = lookup('generic_worker.gecko_3_t_osx_1014.quarantine_client_id')
             $quarantine_access_token  = lookup('generic_worker.gecko_3_t_osx_1014.quarantine_access_token')
             $bugzilla_api_key         = lookup('generic_worker.gecko_3_t_osx_1014.bugzilla_api_key')
+            $ed25519_signing_key      = lookup('generic_worker.gecko_3_t_osx_1014.ed25519_signing_key')
 
             class { 'generic_worker::multiuser':
                 taskcluster_client_id     => $taskcluster_client_id,
@@ -55,6 +56,7 @@ class roles_profiles::profiles::gecko_3_t_osx_1014_generic_worker {
                 livelog_sha256            => 'caabc35ec26498e755863d08c4c8b79e8b041a1d11b1fc8be0909718fc81113d',
                 user                      => 'root',
                 gw_dir                    => '/var/local/generic-worker',
+                ed25519_signing_key_content => $ed25519_signing_key,
             }
 
             include dirs::tools
