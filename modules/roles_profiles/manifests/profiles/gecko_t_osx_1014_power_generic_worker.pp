@@ -9,19 +9,20 @@ class roles_profiles::profiles::gecko_t_osx_1014_power_generic_worker {
     $worker_type  = 'gecko-t-osx-1014-power'
     $worker_group = 'bitbar' # regsubst($facts['networking']['fqdn'], '.*\.releng\.(.+)\.mozilla\..*', '\1')
 
+    $meta_data        = {
+        workerType    => $worker_type,
+        workerGroup   => $worker_group,
+        provisionerId => 'releng-hardware',
+        workerId      => $facts['networking']['hostname'],
+    }
+
     case $::operatingsystem {
         'Darwin': {
 
             class { 'puppet::atboot':
                 telegraf_user     => lookup('telegraf.user'),
                 telegraf_password => lookup('telegraf.password'),
-                # Note the camelCase key names
-                meta_data         => {
-                    workerType    => $worker_type,
-                    workerGroup   => $worker_group,
-                    provisionerId => 'releng-hardware',
-                    workerId      => $facts['networking']['hostname'],
-                },
+                meta_data         => $meta_data,
             }
 
             class { 'roles_profiles::profiles::logging':
@@ -30,6 +31,35 @@ class roles_profiles::profiles::gecko_t_osx_1014_power_generic_worker {
             }
 
             require packages::xcode_cmd_line_tools
+            class { 'telegraf':
+                global_tags  => $meta_data,
+                agent_params => {
+                    interval          => '300s',
+                    round_interval    => true,
+                    collection_jitter => '0s',
+                    flush_interval    => '120s',
+                    flush_jitter      => '60s',
+                    precision         => 's',
+                },
+                inputs       => {
+                    # current default telegraf monitors: system, mem, swap, disk'/', puppetagent
+                    temp     => {},
+                    cpu      => {
+                        interval         => '60s',
+                        percpu           => true,
+                        totalcpu         => true,
+                        ## If true, collect raw CPU time metrics.
+                        collect_cpu_time => false,
+                        ## If true, compute and report the sum of all non-idle CPU states.
+                        report_active    => false,
+                    },
+                    diskio   => {},
+                    procstat => {
+                        interval => '60s',
+                        exe      => 'generic-worker',
+                    },
+                },
+            }
 
             class { 'talos':
                 user => 'cltbld',
@@ -66,6 +96,9 @@ class roles_profiles::profiles::gecko_t_osx_1014_power_generic_worker {
             }
 
             include dirs::tools
+
+            include packages::google_chrome
+            include roles_profiles::profiles::disable_chrome_updater
 
             contain packages::nodejs
             contain packages::wget
