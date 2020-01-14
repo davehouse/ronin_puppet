@@ -11,6 +11,10 @@
 rm -f tasks-resolved-count.txt
 
 <% if scope.lookupvar('::operatingsystem') == 'Darwin' -%>
+cp /var/log/genericworker/stdout.1.log /var/log/genericworker/stdout.2.log 2>/dev/null
+cp /var/log/genericworker/stderr.1.log /var/log/genericworker/stderr.2.log 2>/dev/null
+cp /var/log/genericworker/stdout.log /var/log/genericworker/stdout.1.log 2>/dev/null
+cp /var/log/genericworker/stderr.log /var/log/genericworker/stderr.1.log 2>/dev/null
 exec 1> >(tee /var/log/genericworker/stdout.log >&1)
 exec 2> >(tee /var/log/genericworker/stderr.log >&2)
 <% end %>
