@@ -10,6 +10,8 @@ class roles_profiles::profiles::mac_v3_signing {
             $worker_type  = 'mac-v3-signing'
             $worker_group = regsubst($facts['networking']['fqdn'], '.*\.releng\.(.+)\.mozilla\..*', '\1')
 
+            include puppet::disable_atboot
+
             class { 'roles_profiles::profiles::logging':
                 # The logging module tags the logs with:
                 # hostname: hostname
@@ -63,6 +65,54 @@ class roles_profiles::profiles::mac_v3_signing {
                     notarization_users  => $user_data['notarization_users'],
                     ed_key_filename     => $user_data['ed_key_filename'],
                 }
+            }
+
+            class { 'telegraf':
+                global_tags  => {
+                    workerType    => $worker_type,
+                    workerGroup   => $worker_group,
+                    provisionerId => 'scriptworker-prov-v1',
+                    role          => $role,
+                    workerId      => $facts['networking']['hostname'],
+                },
+                agent_params => {
+                    interval          => '300s',
+                    round_interval    => true,
+                    collection_jitter => '0s',
+                    precision         => 's',
+                },
+                inputs       => {
+                    # current default telegraf monitors: system, mem, swap, disk'/', puppetagent
+                    system      => {},
+                    temp        => {},
+                    cpu         => {
+                        interval         => '60s',
+                        percpu           => true,
+                        totalcpu         => true,
+                        ## If true, collect raw CPU time metrics.
+                        collect_cpu_time => false,
+                        ## If true, compute and report the sum of all non-idle CPU states.
+                        report_active    => false,
+                    },
+                    mem         => {},
+                    swap        => {},
+                    disk        => {
+                        mount_points => ['/'],
+                    },
+                    diskio      => {},
+                    procstat    => {
+                        interval => '60s',
+                        exe      => '/builds/scriptworker/bin/scriptworker',
+                    },
+                    procstat2   => {
+                        plugin_type => 'procstat',
+                        interval    => '60s',
+                        pattern     => 'tools/release/signing/signing-server.py',
+                    },
+                    puppetagent => {
+                        location => '/opt/puppetlabs/puppet/cache/state/last_run_summary.yaml',
+                    },
+                },
             }
         }
         default: {
