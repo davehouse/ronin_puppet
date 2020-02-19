@@ -11,7 +11,7 @@ class packages::python2 {
     }
 
     exec { "pip2":
-        command     => "/usr/local/bin/pip install --upgrade pip setuptools",
+        command     => "/usr/local/bin/pip2 install --upgrade pip setuptools",
         refreshonly => true,
     }
 }
