@@ -18,6 +18,6 @@ class packages::python2 {
     package { 'https://raw.githubusercontent.com/Homebrew/homebrew-core/3a877e3525d93cfeb076fc57579bdd589defc585/Formula/python@2.rb':
         ensure   => present,
         provider => brew,
-        install_options => [ '--link' ],
+        #install_options => [ '--link' ],
     }
 }
