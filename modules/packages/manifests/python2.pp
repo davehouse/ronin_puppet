@@ -13,6 +13,6 @@ class packages::python2 {
         ensure   => present,
         provider => brew,
         install_options => [ '--link' ],
-        subscribe => [ 'davehouse/homebrew-moz' ],
+        subscribe => Package[ 'davehouse/homebrew-moz' ],
     }
 }
