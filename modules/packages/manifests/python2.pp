@@ -5,6 +5,7 @@
 class packages::python2 {
 
     package { "python2":
+        name     => "python2",
         source   => 'https://raw.githubusercontent.com/Homebrew/homebrew-core/3a877e3525d93cfeb076fc57579bdd589defc585/Formula/python@2.rb',
         ensure   => present,
         provider => brew,
