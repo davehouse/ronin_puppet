@@ -5,13 +5,8 @@
 class packages::python2 {
 
     package { 'https://raw.githubusercontent.com/Homebrew/homebrew-core/3a877e3525d93cfeb076fc57579bdd589defc585/Formula/python@2.rb':
-        ensure   => present,
+        ensure   => latest,
         provider => brew,
-        notify   => Exec['pip2'],
-    }
-
-    exec { "pip2":
-        command     => "/usr/local/bin/pip2 install --upgrade pip setuptools",
-        refreshonly => true,
+        install_options => [ '--link' ],
     }
 }
