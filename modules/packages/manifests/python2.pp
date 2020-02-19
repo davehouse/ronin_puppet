@@ -13,6 +13,6 @@ class packages::python2 {
     exec { "pip2":
         command     => "/usr/local/bin/pip install --upgrade pip setuptools",
         refreshonly => true,
-        subscribe   => Package["python2"],
+        subscribe   => Package['python2'],
     }
 }
