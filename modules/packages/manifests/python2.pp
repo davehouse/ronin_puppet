@@ -12,7 +12,7 @@ class packages::python2 {
     # Exec work-around puppet-homebrew module failure to list the package by name (it uses the url):
     # https://github.com/TheKevJames/puppet-homebrew/blob/master/lib/puppet/provider/package/homebrew.rb#L69
     exec { 'install_package':
-        command => "/usr/bin/sudo -u cltbld /usr/local/bin/brew install ${package_url}",
+        command => "/usr/bin/sudo -u cltbld /usr/local/bin/brew install --force ${package_url}",
         unless  => [ "/usr/local/bin/brew list ${package_name}" ],
     }
 }
