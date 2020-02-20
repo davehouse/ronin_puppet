@@ -4,8 +4,16 @@
 
 class packages::python2 {
 
-    package { 'python2':
-        ensure   => present,
-        provider => brew,
+    # use commit hash because python2 is now removed from homebrew-core
+    $package_name = 'python@2'
+    $last_hash = '3a877e3525d93cfeb076fc57579bdd589defc585'
+    $package_url = "https://raw.githubusercontent.com/Homebrew/homebrew-core/${last_hash}/Formula/${package_name}.rb"
+
+    # Exec work-around puppet-homebrew module failure to list the package by name (it uses the url):
+    # https://github.com/TheKevJames/puppet-homebrew/blob/master/lib/puppet/provider/package/homebrew.rb#L69
+    exec { 'install_package':
+        command     => "/usr/bin/sudo -u cltbld /usr/local/bin/brew install ${package_url}",
+        refreshonly => true,
+        unless      => "/usr/local/bin/brew list ${package_name}",
     }
 }
