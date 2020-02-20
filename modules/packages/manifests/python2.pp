@@ -6,7 +6,7 @@ class packages::python2 {
 
     exec { "python2":
         command     => '/usr/local/bin/brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/3a877e3525d93cfeb076fc57579bdd589defc585/Formula/python@2.rb',
-        refreshonly => true,
-        onlyif => [ '/usr/local/bin/brew list python@2' ],
+        # refreshonly => true,
+        unless => [ '/usr/local/bin/brew list python@2' ],
     }
 }
