@@ -24,7 +24,7 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker {
                 telegraf_password => lookup('telegraf.password'),
                 puppet_env          => 'dev',
                 puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
-                puppet_branch       => 'bug1622827_macos-chrome-v81-test',
+                puppet_branch       => 'bug1634202_macos-chrome-autoupdate',
                 puppet_notify_email => 'dhouse@mozilla.com',
                 # Note the camelCase key names
                 meta_data         => $meta_data,
