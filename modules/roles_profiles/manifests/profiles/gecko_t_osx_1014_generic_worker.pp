@@ -6,7 +6,7 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker {
 
     require roles_profiles::profiles::cltbld_user
 
-    $worker_type  = 'gecko-t-osx-1014'
+    $worker_type  = 'gecko-t-osx-1014-beta'
     $worker_group = regsubst($facts['networking']['fqdn'], '.*\.releng\.(.+)\.mozilla\..*', '\1')
 
     $meta_data        = {
@@ -22,6 +22,10 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker {
             class { 'puppet::atboot':
                 telegraf_user     => lookup('telegraf.user'),
                 telegraf_password => lookup('telegraf.password'),
+                puppet_env          => 'dev',
+                puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
+                puppet_branch       => 'bug1549046_macos-allow-desktop-bg-change-test',
+                puppet_notify_email => 'dhouse@mozilla.com',
                 # Note the camelCase key names
                 meta_data         => $meta_data,
             }
