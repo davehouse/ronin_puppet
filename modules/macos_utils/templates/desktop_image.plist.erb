@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>org.mozilla.desktop_image</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python</string>
+        <string><%= @bg_script %></string>
+        <string>-v</string>
+        <string>-s</string>
+        <string><%= @image %></string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>

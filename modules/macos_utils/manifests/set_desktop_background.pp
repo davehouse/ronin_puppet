@@ -7,18 +7,15 @@ class macos_utils::set_desktop_background (
 ) {
     $bg_script = '/usr/local/bin/mac_desktop_image.py'
 
-    file { $bg_script:
-        content => file('macos_utils/mac_desktop_image.py'),
-    }
+    file { 
+        $bg_script:
+            ensure  => present,
+            content => file('macos_utils/mac_desktop_image.py'),
+            mode    => '0755';
 
-    if $::operatingsystem == 'Darwin' {
-        # su to get user desktop environment. exec's user option cannot do this
-        exec { 'execute python script to apply macos desktop background':
-            command => "/usr/bin/su - cltbld -c '/usr/bin/python ${bg_script} -v -s ${image}'",
-            require => File[$bg_script],
-            unless  => "/usr/bin/su - cltbld -c '/usr/bin/python ${bg_script} -v -c ${image}'",
-        }
-    } else {
-        fail("${module_name} does not support ${::operatingsystem}")
+        '/Users/cltbld/Library/LaunchAgents/org.mozilla.desktop_image.plist':
+            ensure  => present,
+            content => template('macos_util/desktop_image.plist.erb'),
+            mode    => '0755';
     }
 }
