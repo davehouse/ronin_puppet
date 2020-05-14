@@ -15,7 +15,7 @@ class macos_utils::set_desktop_background (
 
         '/Users/cltbld/Library/LaunchAgents/org.mozilla.desktop_image.plist':
             ensure  => present,
-            content => template('macos_util/desktop_image.plist.erb'),
+            content => template('macos_utils/desktop_image.plist.erb'),
             mode    => '0755';
     }
 }
