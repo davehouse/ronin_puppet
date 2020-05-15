@@ -18,11 +18,13 @@ class roles_profiles::profiles::homebrew (
         multiuser => true,
         require   => Class['packages::xcode_cmd_line_tools'],
     }
-    -> file { '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/.git/refs/heads/master':
-        ensure  => file,
-        content => "${formula_hash}\n",
-        owner   => 'root',
-        mode    => '0644',
+    -> vcsrepo { '/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core':
+        ensure   => present,
+        provider => git,
+        user     => 'cltbld',
+        source   => 'https://github.com/Homebrew/homebrew-core',
+        revision => "${formula_hash}",
+        depth    => 1,
     }
 
     file { '/etc/environment': ensure => present }
