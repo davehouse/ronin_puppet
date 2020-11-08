@@ -2,8 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-class roles_profiles::profiles::gecko_t_osx_1015_generic_worker (
-    String $worker_type = 'gecko-t-osx-1015',
+class roles_profiles::profiles::gecko_1_b_osx_1015_generic_worker (
+    String $worker_type = 'gecko-1-b-osx-1015',
 ) {
     require roles_profiles::profiles::cltbld_user
 
@@ -26,7 +26,7 @@ class roles_profiles::profiles::gecko_t_osx_1015_generic_worker (
                 meta_data         => $meta_data,
                 puppet_env          => 'dev',
                 puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
-                puppet_branch       => 'bug1667424_macos-bigsur',
+                puppet_branch       => 'bug1665379_mac-builders',
                 puppet_notify_email => 'dhouse@mozilla.com',
 
             }
@@ -70,12 +70,12 @@ class roles_profiles::profiles::gecko_t_osx_1015_generic_worker (
                 user => 'cltbld',
             }
 
-            $taskcluster_client_id    = lookup('generic_worker.datacenter_gecko_t_osx_1014.taskcluster_client_id')
-            $taskcluster_access_token = lookup('generic_worker.datacenter_gecko_t_osx_1014.taskcluster_access_token')
-            $livelog_secret           = lookup('generic_worker.datacenter_gecko_t_osx_1014.livelog_secret')
-            $quarantine_client_id     = lookup('generic_worker.datacenter_gecko_t_osx_1014.quarantine_client_id')
-            $quarantine_access_token  = lookup('generic_worker.datacenter_gecko_t_osx_1014.quarantine_access_token')
-            $bugzilla_api_key         = lookup('generic_worker.datacenter_gecko_t_osx_1014.bugzilla_api_key')
+            $taskcluster_client_id    = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.taskcluster_client_id')
+            $taskcluster_access_token = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.taskcluster_access_token')
+            $livelog_secret           = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.livelog_secret')
+            $quarantine_client_id     = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.quarantine_client_id')
+            $quarantine_access_token  = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.quarantine_access_token')
+            $bugzilla_api_key         = lookup('generic_worker.datacenter_gecko_1_b_osx_1015.bugzilla_api_key')
 
 
             class { 'packages::zstandard':
@@ -101,18 +101,16 @@ class roles_profiles::profiles::gecko_t_osx_1015_generic_worker (
                 user_homedir              => '/Users/cltbld',
             }
 
-            file_line { '/etc/synthetic.conf':
-                line    => 'tools\tSystem/Volumes/Data/tools',
-            }
-            file_line { '/etc/synthetic.conf':
-                line    => 'builds\tSystem/Volumes/Data/builds',
-            }
-            include dirs::tools
+            # exec { 'writes_in_catalina':
+            #     command => '/sbin/mount -uw /',
+            #     unless  => '/bin/test -d /builds || /bin/test -d /tools'
+            # }
+            #include dirs::tools
 
             #include packages::google_chrome
 
             contain packages::nodejs
-            contain packages::wget
+            #contain packages::wget
             contain packages::tooltool
             file { '/tools/tooltool.py':
                 ensure  => 'link',
