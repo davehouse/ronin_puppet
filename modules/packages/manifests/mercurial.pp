@@ -21,9 +21,9 @@ class packages::mercurial (
     # but installs them in:
     # /Library/Python/2.7/site-packages/
     # So, link /Library under /usr to make hg find it.
-    file { '/usr/Library':
-        ensure  => 'link',
-        target  => '/Library',
-        require => Class['packages::python2'];
-    }
+    # file { '/usr/Library':
+    #     ensure  => 'link',
+    #     target  => '/Library',
+    #     require => Class['packages::python2'];
+    # }
 }
