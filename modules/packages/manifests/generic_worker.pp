@@ -16,7 +16,7 @@ class packages::generic_worker (
         os_version_specific => true,
         type                => 'bin',
         file_destination    => '/usr/local/bin/generic-worker',
-        checksum            => $generic_worker_sha256,
+        #checksum            => $generic_worker_sha256,
     }
 
     packages::macos_package_from_s3 { "taskcluster-proxy-darwin-amd64-${taskcluster_proxy_version}":
@@ -24,7 +24,7 @@ class packages::generic_worker (
         os_version_specific => true,
         type                => 'bin',
         file_destination    => '/usr/local/bin/taskcluster-proxy',
-        checksum            => $taskcluster_proxy_sha256,
+        #checksum            => $taskcluster_proxy_sha256,
     }
 
     packages::macos_package_from_s3 { "quarantine-worker-darwin-amd64-${quarantine_worker_version}":
@@ -32,6 +32,6 @@ class packages::generic_worker (
         os_version_specific => true,
         type                => 'bin',
         file_destination    => '/usr/local/bin/quarantine-worker',
-        checksum            => $quarantine_worker_sha256,
+        #checksum            => $quarantine_worker_sha256,
     }
 }
