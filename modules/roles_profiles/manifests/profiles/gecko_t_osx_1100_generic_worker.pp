@@ -26,7 +26,7 @@ class roles_profiles::profiles::gecko_t_osx_1100_generic_worker (
                 meta_data         => $meta_data,
                 puppet_env          => 'dev',
                 puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
-                puppet_branch       => 'bug1667424_macos-bigsur',
+                puppet_branch       => 'bigsursingle',
                 puppet_notify_email => 'dhouse@mozilla.com',
 
             }
@@ -117,7 +117,7 @@ class roles_profiles::profiles::gecko_t_osx_1100_generic_worker (
             #include packages::google_chrome
 
             contain packages::nodejs
-            contain packages::wget
+            #contain packages::wget
             contain packages::tooltool
             file { '/tools/tooltool.py':
                 ensure  => 'link',
