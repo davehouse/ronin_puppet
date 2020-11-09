@@ -48,13 +48,13 @@ class generic_worker (
     $ed25519_signing_key = "${user_homedir}/generic-worker.ed25519.signing.key"
 
     exec {
-        'create opengpg signing key':
-            path    => ['/bin', '/sbin', '/usr/local/bin', '/usr/bin'],
-            user    => $user,
-            cwd     => $user_homedir,
-            command => "generic-worker new-openpgp-keypair --file ${opengpg_signing_key}",
-            unless  => "test -f ${opengpg_signing_key}",
-            require => Class['packages::generic_worker'];
+        # 'create opengpg signing key':
+        #     path    => ['/bin', '/sbin', '/usr/local/bin', '/usr/bin'],
+        #     user    => $user,
+        #     cwd     => $user_homedir,
+        #     command => "generic-worker new-openpgp-keypair --file ${opengpg_signing_key}",
+        #     unless  => "test -f ${opengpg_signing_key}",
+        #     require => Class['packages::generic_worker'];
 
         'create ed25519 signing key':
             path    => ['/bin', '/sbin', '/usr/local/bin', '/usr/bin'],
