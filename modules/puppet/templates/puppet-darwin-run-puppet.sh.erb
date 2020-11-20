@@ -136,6 +136,9 @@ EOF
     return 0
 }
 
+function brew() { arch --x86_64 brew "$@"; }
+export -f brew
+
 function run_puppet {
 
     # Always bring the puppet git up-to-sync before executing puppet
