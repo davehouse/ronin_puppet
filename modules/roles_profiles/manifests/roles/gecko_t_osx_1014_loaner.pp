@@ -26,7 +26,7 @@ class roles_profiles::roles::gecko_t_osx_1014_loaner {
     }
     $worker_number = split(regsubst($::fqdn, '([^\.]+)\..*', '\1'), '-')[-1]
     class { '::roles_profiles::profiles::gecko_t_osx_1014_generic_worker':
-        worker_type => "gecko-t-osx-1014-loaner-${worker_number}",
+        worker_type => "gecko-t-osx-1014-bug1689692",
     }
     include ::fw::roles::osx_taskcluster_worker_loaner
 

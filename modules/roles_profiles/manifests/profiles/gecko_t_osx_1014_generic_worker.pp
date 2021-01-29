@@ -3,7 +3,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 class roles_profiles::profiles::gecko_t_osx_1014_generic_worker (
-    String $worker_type = 'gecko-t-osx-1014-bug1656963',
+    String $worker_type = 'gecko-t-osx-1014-bug1689692',
 ) {
 
     require roles_profiles::profiles::cltbld_user
@@ -27,7 +27,7 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker (
                 meta_data         => $meta_data,
                 puppet_env          => 'dev',
                 puppet_repo         => 'https://github.com/davehouse/ronin_puppet.git',
-                puppet_branch       => 'bug1656963_macos-ffmpeg-imagick',
+                puppet_branch       => 'bug1689692_loaner',
                 puppet_notify_email => 'dhouse@mozilla.com',
 
             }
@@ -103,9 +103,6 @@ class roles_profiles::profiles::gecko_t_osx_1014_generic_worker (
             }
 
             include dirs::tools
-
-            contain packages::imagemagick
-            contain packages::ffmpeg
 
             include packages::google_chrome
 
