@@ -69,6 +69,7 @@
   @type record_transformer
   enable_ruby true
   <record>
+    hostname "#{Socket.gethostname.split('.')[0]}"
     program "worker"
     # single user:
     # No task claimed. Idle for 5h15m43.362805902s (will exit if no task claimed in 90h44m16.637194098s). 1 more tasks to run before exiting.
@@ -78,7 +79,7 @@
     # No task 45h41m6 50h18m53
 <% if @syslog_host != '' -%>
     severity "${tag_parts[1]}"
-    log_message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
+    message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% end -%>
 <% if @stackdriver_clientid != '' -%>
     # stackdriver severities:
@@ -90,7 +91,7 @@
 </filter>
 <% end -%>
 
-<filter **>
+<filter *>
   @type record_transformer
   enable_ruby true
   <record>
@@ -102,16 +103,28 @@
     # syslog severities:
     #   https://github.com/eric/syslog_protocol/blob/master/lib/syslog_protocol/common.rb#L58
     severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
-    message [${record["pid"]}]: ${record["log_message"]}
+    message ${record["log_message"]}
 <% end -%>
 <% if @stackdriver_clientid != '' -%>
-    message ${record["program"]}[${record["pid"]}]: ${record['log_message']}
+    message ${record["program"]}: ${record['log_message']}
     # stackdriver severities:
     #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
     stackdriver_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
 <% end -%>
   </record>
 </filter>
+
+<filter fluent.error>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    hostname "#{Socket.gethostname.split('.')[0]}"
+    severity "${tag_parts[1]}"
+  </record>
+</filter>
+<match fluent.{debug,info,warn}>
+  @type null
+</match>
 
 <% if @stackdriver_clientid != '' -%>
 # Add a unique insertId to each log entry that doesn't already have it.
@@ -143,9 +156,6 @@
 </filter>
 <% end -%>
 
-<match fluent.**>
-  @type null
-</match>
 
 <match **>
   @type copy
