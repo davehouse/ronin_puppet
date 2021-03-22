@@ -1,5 +1,4 @@
 <source>
-  tag system
   @type exec
   command "\
     log stream --color none --level info --type log \
@@ -19,78 +18,13 @@
     time_key time
     time_format "%Y-%m-%d %H:%M:%S.%N%z"
   </parse>
+  tag system
   run_interval 60s  # run command if not still running
 </source>
-
-<filter system>
-  @type record_transformer
-  enable_ruby true
-  <record>
-<% if @syslog_host =~ /papertrail/ -%>
-    # message #{record["message"]}
-<% end -%>
-    # Logging pid can be enabled:
-    # message pid:${record["pid"]} ${record["message"]}
-    # MacOS Unified logging levels: Fault, Error, Default, Info, Debug
-    # error="'Default' is not a designated severity"
-    # syslog severities:
-    #   https://github.com/eric/syslog_protocol/blob/master/lib/syslog_protocol/common.rb#L58
-<% if @syslog_host =~ /papertrail/ -%>
-    severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
-<% elsif @syslog_host != '' -%>
-    syslog_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
-<% end -%>
-<% if @stackdriver_clientid != '' -%>
-    message ${record["program"]}: ${record['log_message']}
-    # stackdriver severities:
-    #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
-    stackdriver_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
-<% end -%>
-  </record>
-</filter>
-
-
-<% if @syslog_tail_file != '' -%>
-<source>
-  tag syslog
-  @type tail
-  read_from_head true
-  path /var/log/system.log
-  pos_file /var/log/system.log.pos
-  <parse>
-    # standard syslog parsing often fails because the macos system.log has inconsistent multi-line, space delimiters, and ident/pid formatting
-    # @type syslog
-    # with_priority false
-    # parser_type string
-    @type multiline
-    format_firstline /^[A-Za-z]{3} +\d+ \d{2}:\d{2}:\d{2} /
-    # ugly regex that handles the varieties of macos syslog lines I've tested
-    format1 /^(?<time>[A-Za-z]{3} +\d+ \d{2}:\d{2}:\d{2}) [^ ]+ (?<ident>[^\[ :]*)(?<message>[\[\]A-Za-z: ]*(\[(?<pid>\d+)\]:?)? .*)/
-    time_key time
-    time_format "%b %d %H:%M:%S"
-    keep_time_key true
-  </parse>
-</source>
-<filter syslog>
-  @type record_transformer
-  <record>
-    severity info
-    program ${record["ident"]}
-    facility local0
-  </record>
-</filter>
-<filter syslog>
-  @type grep
-  # asl is deprecated.
-  # logged every 10m
-  exclude1 message ASL\ Sender\ Statistics$
-</filter>
-<% end -%>
 
 
 <% if @tail_worker_logs -%>
 <source>
-  tag worker.err
   @type tail
   read_from_head true
   path <%= @worker_stderr %>
@@ -104,9 +38,9 @@
     time_format "%Y/%m/%d %H:%M:%S"
     keep_time_key true
   </parse>
+  tag worker.err
 </source>
 <source>
-  tag worker.info
   @type tail
   read_from_head true
   path <%= @worker_stdout %>
@@ -120,11 +54,15 @@
     time_format "%Y/%m/%d %H:%M:%S"
     keep_time_key true
   </parse>
+  tag worker.info
 </source>
 
 <filter worker.**>
   @type grep
-  exclude1 log_message ^Disk\ available:\ \d+\ bytes$|^No\ change\ to\ deploymentId\ -\ $
+  <exclude>
+    key message
+    pattern /^Disk available: \d+ bytes$/
+  </exclude>
 </filter>
 
 <filter worker.**>
@@ -140,23 +78,44 @@
     # No task 45h41m6 50h18m53
 <% if @syslog_host =~ /papertrail/ -%>
     severity "${tag_parts[1]}"
+    message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% elsif @syslog_host != '' -%>
     syslog_severity "${tag_parts[1]}"
+    log_message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% end -%>
 <% if @stackdriver_clientid != '' -%>
     # stackdriver severities:
     #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
     stackdriver_severity "${tag_parts[1].gsub(/^(err|info)/i, 'info' => 'info', 'err' => 'error')}"
-    message #{record["program"]} #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
-<% else -%>
-    message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
+    log_message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% end -%>
-    # No task claimed. Idle for 5h15m43.362805902s (will exit if no task claimed in 90h44m16.637194098s). 1 more tasks to run before exiting.
-    # No task 5h15m43 1
   </record>
 </filter>
 <% end -%>
 
+<filter system>
+  @type record_transformer
+  enable_ruby true
+  <record>
+<% if @syslog_host =~ /papertrail/ -%>
+    hostname "#{Socket.gethostname.split('.')[0]}"
+<% end -%>
+    # Logging pid can be enabled:
+    # message pid:${record["pid"]} ${record["message"]}
+    # MacOS Unified logging levels: Fault, Error, Default, Info, Debug
+<% if @syslog_host != '' -%>
+    # syslog severities:
+    #   https://github.com/eric/syslog_protocol/blob/master/lib/syslog_protocol/common.rb#L58
+    syslog_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
+<% end -%>
+<% if @stackdriver_clientid != '' -%>
+    message ${record["program"]}: ${record['log_message']}
+    # stackdriver severities:
+    #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+    stackdriver_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
+<% end -%>
+  </record>
+</filter>
 
 <% if @stackdriver_clientid != '' -%>
 # Add a unique insertId to each log entry that doesn't already have it.
@@ -191,14 +150,6 @@
 <match fluent.**>
   @type null
 </match>
-
-<filter **>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    hostname "#{Socket.gethostname.split('.')[0]}"
-  </record>
-</filter>
 
 <match **>
   @type copy
@@ -237,7 +188,7 @@
     severity ${syslog_severity}
     <format>
       @type single_value
-      message_key message
+      message_key log_message
     </format>
   </store>
 <% else -%>
