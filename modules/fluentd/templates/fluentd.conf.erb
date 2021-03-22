@@ -69,7 +69,6 @@
   @type record_transformer
   enable_ruby true
   <record>
-    hostname "#{Socket.gethostname.split('.')[0]}"
     program "worker"
     # single user:
     # No task claimed. Idle for 5h15m43.362805902s (will exit if no task claimed in 90h44m16.637194098s). 1 more tasks to run before exiting.
@@ -95,9 +94,6 @@
   @type record_transformer
   enable_ruby true
   <record>
-<% if @syslog_host =~ /papertrail/ -%>
-    hostname "#{Socket.gethostname.split('.')[0]}"
-<% end -%>
     # MacOS Unified logging levels: Fault, Error, Default, Info, Debug
 <% if @syslog_host != '' -%>
     # syslog severities:
@@ -118,7 +114,6 @@
   @type record_transformer
   enable_ruby true
   <record>
-    hostname "#{Socket.gethostname.split('.')[0]}"
     severity "${tag_parts[1]}"
   </record>
 </filter>
@@ -156,6 +151,15 @@
 </filter>
 <% end -%>
 
+<% if @syslog_host =~ /papertrail/ -%>
+<filter **>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    default_hostname "#{Socket.gethostname.split('.')[0]}"
+  </record>
+</filter>
+<% end -%>
 
 <match **>
   @type copy
