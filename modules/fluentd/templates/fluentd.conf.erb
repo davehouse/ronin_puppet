@@ -60,7 +60,7 @@
 <filter worker.**>
   @type grep
   <exclude>
-    key message
+    key log_message
     pattern /^Disk available: \d+ bytes$/
   </exclude>
 </filter>
@@ -76,11 +76,8 @@
     # multi-user:
     # No task claimed. Idle for 45h41m6.936831744s (will exit if no task claimed in 50h18m53.063168256s).
     # No task 45h41m6 50h18m53
-<% if @syslog_host =~ /papertrail/ -%>
+<% if @syslog_host != '' -%>
     severity "${tag_parts[1]}"
-    message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
-<% elsif @syslog_host != '' -%>
-    syslog_severity "${tag_parts[1]}"
     log_message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% end -%>
 <% if @stackdriver_clientid != '' -%>
@@ -93,23 +90,22 @@
 </filter>
 <% end -%>
 
-<filter system>
+<filter **>
   @type record_transformer
   enable_ruby true
   <record>
 <% if @syslog_host =~ /papertrail/ -%>
     hostname "#{Socket.gethostname.split('.')[0]}"
 <% end -%>
-    # Logging pid can be enabled:
-    # message pid:${record["pid"]} ${record["message"]}
     # MacOS Unified logging levels: Fault, Error, Default, Info, Debug
 <% if @syslog_host != '' -%>
     # syslog severities:
     #   https://github.com/eric/syslog_protocol/blob/master/lib/syslog_protocol/common.rb#L58
-    syslog_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
+    severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
+    message [${record["pid"]}]: ${record["log_message"]}
 <% end -%>
 <% if @stackdriver_clientid != '' -%>
-    message ${record["program"]}: ${record['log_message']}
+    message ${record["program"]}[${record["pid"]}]: ${record['log_message']}
     # stackdriver severities:
     #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
     stackdriver_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
@@ -180,15 +176,15 @@
     hostname "#{Socket.gethostname.split('.')[0]}"
     host <%= @syslog_host %>
     port <%= @syslog_port %>
-    <buffer program,syslog_severity>
+    <buffer program,severity>
       flush_at_shutdown true
       overflow_action block
     </buffer>
     program ${program}
-    severity ${syslog_severity}
+    severity ${severity}
     <format>
       @type single_value
-      message_key log_message
+      message_key message
     </format>
   </store>
 <% else -%>
