@@ -2,7 +2,7 @@
   tag system
   @type exec
   command "\
-    log stream --color none --level <%= @mac_log_level %> --type log \
+    log stream --color none --level info --type log \
       --predicate '(process MATCHES \"(logger|sudo|sshd)\") || (messageType > 16)' \
       --timeout 1d \
     | tail -n +3 \
@@ -50,6 +50,7 @@
 </filter>
 
 
+<% if @syslog_tail_file != '' -%>
 <source>
   tag syslog
   @type tail
@@ -84,6 +85,7 @@
   # logged every 10m
   exclude1 message ASL\ Sender\ Statistics$
 </filter>
+<% end -%>
 
 
 <% if @tail_worker_logs -%>
