@@ -5,6 +5,6 @@
 class dirs::builds {
 
     file { '/builds':
-        ensure => directory,
+        ensure => link,
     }
 }
