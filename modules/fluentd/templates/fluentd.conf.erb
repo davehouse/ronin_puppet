@@ -1,50 +1,83 @@
+<system>
+  root_dir /var/log/td-agent         # For handling unrecoverable chunks
+</system>
+
 <source>
   tag system
   @type exec
+  # log show entries since boot
   command "\
-    log stream --color none --level <%= @mac_log_level %> --type log \
-      --predicate '(process MATCHES \"(logger|sudo|sshd|firefox|plugin-agent)\") || (messageType > 16)' \
-      --timeout 1d \
-    | tail -n +3 \
+    log show --last boot --info --color none --style default \
+      --predicate 'eventType == \"logEvent\" && (process MATCHES \"(logger|sudo|sshd)\" || messageType >= <%= @mac_log_level %>)' \
+    | sed -l -e '1d' \
     "
-    # messageTypes 0:Default 1:Info 2:Debug ?:Error
-    # tail to omit first 2 lines that cause parsing to fail:
-    #   Filtering the log data using "type == 1024"
-    #   Timestamp                       Thread     Type        Activity             PID    TTL
-    #   2019-05-17 22:49:59.070398+0000 0x195      Info        0x0                  0      0    kernel: (IOHIDFamily) HID Activity Tickle (type:0 sender:100007033)
   <parse>
     @type regexp
-    expression /^(?<time>.{31}) (?<thread>\S+)\s+(?<severity>\S+)\s+(?<activity>\S+)\s+(?<pid>\S+)\s+(?<ttl>\S+)\s+((?<program>\S+):\s+)?(?<log_message>.*)$/
+    expression /^(?<time>.{31})\s+(?<thread>\S+)\s+(?<severity>\S+)\s+(?<activity>\S+)\s+(?<pid>\S+)\s+(?<ttl>\S+)\s+((?<program>\S+):\s+)?(?<log_message>.*)$/
     types pid:integer
     time_key time
     time_format "%Y-%m-%d %H:%M:%S.%N%z"
   </parse>
-  run_interval 60s  # run command if not still running
+</source>
+
+<source>
+  tag system
+  @type exec
+  # log stream from now
+  command "\
+    log stream --type log --level info --color none \
+      --predicate '(process MATCHES \"(logger|sudo|sshd)\" || messageType >= <%= @mac_log_level %>)' \
+      --timeout 1d \
+    | sed -l -e '2d' \
+    "
+    # messageType integers:
+    #   0 debug
+    #   1 info
+    #   2 warn
+    #   16 error
+    #   17 crit
+    # tail to omit first 2 lines that cause parsing to fail:
+    #   Filtering the log data using "type == 1024"
+    #   Timestamp                       Thread     Type        Activity             PID    TTL
+    #   2019-05-17 22:49:59.070398+0000 0x195      Info        0x0                  0      0    kernel: (IOHIDFamily) HID Activity Tickle (type:0 sender:100007033)
+    # tail with bsd sed `-l` (line-buffers instead of stdbuf)
+  <parse>
+    @type regexp
+    # getting tsv or csv requires reformatting in the command pipeline
+    # log can output json, but
+    # 1. it is a streamed array (req. cuts+matches in pipe)
+    # 2. json plugin in mac fluentd has bugs dropping entries and buffering
+    expression /^(?<time>.{31})\s+(?<thread>\S+)\s+(?<severity>\S+)\s+(?<activity>\S+)\s+(?<pid>\S+)\s+(?<ttl>\S+)\s+((?<program>\S+):\s+)?(?<log_message>.*)$/
+    types pid:integer
+    time_key time
+    time_format "%Y-%m-%d %H:%M:%S.%N%z"
+  </parse>
+  # callback will error or warn if it stopped
+  # Do not use run_interval:
+  # 1. run_interval delays first execution to end of first interval
+  # 2. run_interval buffers output
 </source>
 
 <filter system>
   @type record_transformer
   enable_ruby true
   <record>
-<% if @syslog_host =~ /papertrail/ -%>
-    # message #{record["message"]}
-<% end -%>
-    # Logging pid can be enabled:
-    # message pid:${record["pid"]} ${record["message"]}
     # MacOS Unified logging levels: Fault, Error, Default, Info, Debug
     # error="'Default' is not a designated severity"
     # syslog severities:
     #   https://github.com/eric/syslog_protocol/blob/master/lib/syslog_protocol/common.rb#L58
 <% if @syslog_host =~ /papertrail/ -%>
-    severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
+    severity #{(record["severity"]||"Error").gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
 <% elsif @syslog_host != '' -%>
-    syslog_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
+    syslog_severity #{(record["severity"]||"Error").gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warn', 'Error' => 'err', 'Fault' => 'crit')}
 <% end -%>
-<% if @stackdriver_clientid != '' -%>
-    message ${record["program"]}: ${record['log_message']}
+<% if @stackdriver_clientid == '' -%>
+    message \[${record["pid"]}\]: ${record["log_message"]}
+<% else -%>
+    message ${record["program"]}\[${record["pid"]}\]: ${record["log_message"]}
     # stackdriver severities:
     #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
-    stackdriver_severity #{record["severity"].gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
+    stackdriver_severity #{(record["severity"]||"Error").gsub(/^(Info|Default|Error|Fault)/i, 'Info' => 'info', 'Default' => 'warning', 'Error' => 'error', 'Fault' => 'critical')}
 <% end -%>
   </record>
 </filter>
@@ -80,9 +113,10 @@
 </filter>
 <filter syslog>
   @type grep
-  # asl is deprecated.
-  # logged every 10m
-  exclude1 message ASL\ Sender\ Statistics$
+  <regexp>
+    key program
+    pattern /^sshd$/
+  </regexp>
 </filter>
 
 
@@ -91,8 +125,8 @@
   tag worker.err
   @type tail
   read_from_head true
-  path /var/opt/generic-worker/service.stderr.log
-  pos_file /var/opt/generic-worker/service.stderr.log.pos
+  path <%= @worker_stderr %>
+  pos_file <%= @worker_stderr %>.pos
   <parse>
     @type multiline
     # 2019/11/07 18:41:43 Disk available: 225110376448 bytes\n
@@ -107,8 +141,8 @@
   tag worker.info
   @type tail
   read_from_head true
-  path /var/opt/generic-worker/service.stdout.log
-  pos_file /var/opt/generic-worker/service.stdout.log.pos
+  path <%= @worker_stdout %>
+  pos_file <%= @worker_stdout %>.pos
   <parse>
     @type multiline
     # 2019/11/07 18:41:43 Disk available: 225110376448 bytes\n
@@ -122,7 +156,10 @@
 
 <filter worker.**>
   @type grep
-  exclude1 log_message ^Disk\ available:\ \d+\ bytes$|^No\ change\ to\ deploymentId\ -\ $
+  <exclude>
+    key log_message
+    pattern /^Disk available: \d+ bytes$/
+  </exclude>
 </filter>
 
 <filter worker.**>
@@ -145,7 +182,8 @@
     # stackdriver severities:
     #   https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
     stackdriver_severity "${tag_parts[1].gsub(/^(err|info)/i, 'info' => 'info', 'err' => 'error')}"
-    message #{record["program"]} #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..* (\d+) more tasks to run before exiting\.$/, '\1 \2 \3')}
+    #message #{record["program"]} #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..* (\d+) more tasks to run before exiting\.$/, '\1 \2 \3')}
+    message #{record["program"]} #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% else -%>
     message #{record["log_message"].sub(/^(No task) claimed. Idle for ([^\.]+)\..*$/, '\1 \2')}
 <% end -%>
@@ -155,6 +193,16 @@
 </filter>
 <% end -%>
 
+<filter fluent.error>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    severity "err"
+  </record>
+</filter>
+<match fluent.{trace,debug,info,warn}>
+  @type null
+</match>
 
 <% if @stackdriver_clientid != '' -%>
 # Add a unique insertId to each log entry that doesn't already have it.
@@ -186,17 +234,6 @@
 </filter>
 <% end -%>
 
-<match fluent.**>
-  @type null
-</match>
-
-<filter **>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    hostname "#{Socket.gethostname.split('.')[0]}"
-  </record>
-</filter>
 
 <match **>
   @type copy
@@ -206,6 +243,17 @@
     @type papertrail
     papertrail_host <%= @syslog_host %>
     papertrail_port <%= @syslog_port %>
+    default_hostname "#{Socket.gethostname.split('.')[0]}"
+    <buffer>
+      @type file
+      path /var/log/td-agent/papertrail_buffer
+      flush_mode interval
+      retry_type exponential_backoff
+      retry_max_interval 97s
+      retry_forever true
+      flush_interval 1s
+      flush_at_shutdown true
+    </buffer>
   </store>
   # debug:
   # <store>

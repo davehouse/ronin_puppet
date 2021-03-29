@@ -13,8 +13,10 @@ class roles_profiles::profiles::logging (
       '.mozilla.com'
     ]),
     Integer $syslog_port        = 514,
-    String $mac_log_level       = 'default',
+    String $mac_log_level       = '17',
     Boolean $tail_worker_logs   = false,
+    Optional[String] $worker_stdout = undef,
+    Optional[String] $worker_stderr = undef,
 ) {
 
     # use a single write-only service account for each project
@@ -55,7 +57,6 @@ class roles_profiles::profiles::logging (
             # https://bugzilla.mozilla.org/show_bug.cgi?id=1520947
         }
         'Darwin': {
-            include macos_utils::set_hostname
             class { 'fluentd':
                 worker_type          => $worker_type,
                 stackdriver_project  => $stackdriver_project,
@@ -66,6 +67,8 @@ class roles_profiles::profiles::logging (
                 syslog_port          => lookup('papertrail.port', {'default_value' => $syslog_port}),
                 mac_log_level        => $mac_log_level,
                 tail_worker_logs     => $tail_worker_logs,
+                worker_stdout        => $worker_stdout,
+                worker_stderr        => $worker_stderr,
             }
         }
         default: {
