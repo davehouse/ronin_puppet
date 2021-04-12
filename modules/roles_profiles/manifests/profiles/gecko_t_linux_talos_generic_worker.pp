@@ -15,7 +15,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
             class { 'roles_profiles::profiles::logging_papertrail':
                 papertrail_host    => lookup( { 'name' => 'papertrail.host', 'default_value' => '' } ),
                 papertrail_port    => lookup( { 'name' => 'papertrail.port', 'default_value' => -1 } ),
-                systemd_units      => ['check_gw', 'run-puppet', 'ssh'],
+                systemd_units      => ['run-puppet', 'ssh'],
                 syslog_identifiers => ['generic-worker', 'run-start-worker', 'sudo'],
             }
 
@@ -76,8 +76,6 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
                 user                      => 'cltbld',
                 user_homedir              => '/home/cltbld',
             }
-
-            require linux_generic_worker::check_gw
 
         }
         default: {
