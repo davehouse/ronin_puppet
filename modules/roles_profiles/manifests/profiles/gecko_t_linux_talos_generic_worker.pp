@@ -5,7 +5,7 @@
 class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
 
     # TODO: make these args to this module and use in call in gecko_t_linux_talos?
-    $worker_type  = 'gecko-t-linux-talos-1804'
+    $worker_type  = 'gecko-t-linux-talos-1804-beta'
     $worker_group = regsubst($facts['networking']['fqdn'], '.*\.releng\.(.+)\.mozilla\..*', '\1')
 
     case $::operatingsystem {
@@ -36,8 +36,8 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
             class { 'puppet::atboot':
                 telegraf_user     => lookup('telegraf.user'),
                 telegraf_password => lookup('telegraf.password'),
-                puppet_repo       => 'https://github.com/mozilla-platform-ops/ronin_puppet.git',
-                puppet_branch     => 'master',
+                puppet_repo       => 'https://github.com/davehouse/ronin_puppet.git',
+                puppet_branch     => 'bug1653855_linux-aws',
                 # Note the camelCase key names
                 meta_data         => {
                     workerType    => $worker_type,
