@@ -50,7 +50,7 @@ class linux_packages::puppet {
 
           # install latest puppet-agent
           package { 'install puppet agent':
-            ensure  => 'latest', #7.5.0-1bionic',
+            ensure  => installed,
             name    => 'puppet-agent',
             require => Exec['apt_update'],
           }
