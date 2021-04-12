@@ -8,7 +8,7 @@ class roles_profiles::profiles::linux_base {
         'Ubuntu': {
             include ::roles_profiles::profiles::locale
             include ::roles_profiles::profiles::timezone
-            include ::roles_profiles::profiles::ntp
+            #include ::roles_profiles::profiles::ntp
             include ::roles_profiles::profiles::motd
             include ::roles_profiles::profiles::users
             include ::roles_profiles::profiles::relops_users
