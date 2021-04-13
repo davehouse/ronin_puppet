@@ -27,7 +27,7 @@ apt-get install -y puppet-agent
 chronyc sources -v || (
 apt install -yq chrony
 grep 'server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4' /etc/chrony/chrony.conf \
-    || echo -e 'server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4\n$(cat /etc/chrony/chrony.conf)' | sudo tee /etc/chrony/chrony.conf
+    || echo -e "server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4\n$(cat /etc/chrony/chrony.conf)" | sudo tee /etc/chrony/chrony.conf
 /etc/init.d/chrony restart
 )
 #/etc/init.d/ntp stop
@@ -196,9 +196,9 @@ function run_puppet {
     # when the puppet exit status is incorrect.
     TMP_LOG=$(mktemp /tmp/puppet-outputXXXXXX)
     [ -f "${TMP_LOG}" ] || fail "Failed to mktemp puppet log file"
-    echo $PUPPET_BIN apply "${PUPPET_OPTIONS[@]}" 2>&1 | tee "${TMP_LOG}"
     pwd
-    exit 0
+    echo $PUPPET_BIN apply "${PUPPET_OPTIONS[@]}" 2>&1 
+    $PUPPET_BIN apply "${PUPPET_OPTIONS[@]}" 2>&1 | tee "${TMP_LOG}"
     retval=$?
     # just in case, if there were any errors logged, flag it as an error run
     if grep -q "^Error:" "${TMP_LOG}"
@@ -229,21 +229,16 @@ case "$OS" in
 esac
 
 # Remove the temp working puppet dir
-rm -rf "$TMP_PUPPET_DIR"
+#rm -rf "$TMP_PUPPET_DIR"
+echo "$TMP_PUPPET_DIR"
+echo $PUPPET_BIN apply "${PUPPET_OPTIONS[@]}"
 
 # record the installation date (note that this won't appear anywhere on Darwin)
 echo "System Installed: $(date)" >> /etc/issue
 
-echo "Success. Rebooting..."
+#echo "Success. Rebooting..."
 
 # Success! Let's reboot
-/sbin/reboot --force &>/dev/null &
-
-echo "   _____                                __"
-echo "  / ___/__  _______________  __________/ /"
-echo "  \__ \/ / / / ___/ ___/ _ \/ ___/ ___/ /"
-echo " ___/ / /_/ / /__/ /__/  __(__  |__  )_/"
-echo "/____/\__,_/\___/\___/\___/____/____(_)"
-echo ""
+#/sbin/reboot --force &>/dev/null &
 
 exit 0
