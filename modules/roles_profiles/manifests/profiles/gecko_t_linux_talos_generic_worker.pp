@@ -38,6 +38,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
                 telegraf_password => lookup('telegraf.password'),
                 puppet_repo       => 'https://github.com/davehouse/ronin_puppet.git',
                 puppet_branch     => 'bug1653855_linux-aws',
+                puppet_notify_email => 'dhouse@mozilla.com',
                 # Note the camelCase key names
                 meta_data         => {
                     workerType    => $worker_type,
