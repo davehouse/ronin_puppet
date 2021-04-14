@@ -9,11 +9,11 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
     $worker_type  = "gecko-t-linux-talos-${instance_type}"
     $worker_group = regsubst($facts['networking']['fqdn'], '^(.*\.releng|ip-.*)\.([^\.]+)\.(mozilla|compute)\..*', '\2')
     $public_hostname = regsubst($facts['ec2_metadata']['public-hostname'], '\.', '-', 'G')
-    if $public_hostname == undef {
-        $worker_id = $facts['hostname']
+    if $public_hostname != undef {
+        $worker_id = $public_hostname
     }
     else {
-        $worker_id = $public_hostname
+        $worker_id = $facts['hostname']
     }
 
     case $::operatingsystem {
