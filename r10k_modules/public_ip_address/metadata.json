@@ -1,0 +1,42 @@
+{
+  "name": "camptocamp-public_ipaddress",
+  "version": "1.1.17",
+  "author": "Camptocamp",
+  "license": "Apache-2.0",
+  "summary": "Camptocamp Public_Ipaddress Module",
+  "source": "https://github.com/camptocamp/puppet-public_ipaddress",
+  "description": "Public Ipaddress Module for Puppet",
+  "project_page": "https://github.com/camptocamp/puppet-public_ipaddress",
+  "dependencies": [
+
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "12.04",
+        "14.04"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    }
+  ]
+}
