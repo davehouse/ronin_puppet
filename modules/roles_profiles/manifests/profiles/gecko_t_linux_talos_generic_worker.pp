@@ -13,7 +13,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
         $worker_id = $public_hostname
     }
     else {
-        $worker_id   = $facts['networking']['hostname']
+        $worker_id = regsubst($facts['ec2_metadata']['public-ip'], '\.', '-', 'G')
     }
 
     case $::operatingsystem {
