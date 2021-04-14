@@ -21,10 +21,10 @@ class linux_gui(
             $on_gpu = true
 
             # Remove the nvidia packages so they do not conflict with intel.
-            package {
-                'nvidia-*':
-                    ensure => absent;
-            }
+            #package {
+            #    'nvidia-*':
+            #        ensure => absent;
+            #}
 
             include linux_gui::appearance
 
@@ -124,10 +124,10 @@ class linux_gui(
                 '18.04': {
                     $gpu_bus_id = 'PCI:0:02:0'
                     file {
-                        '/etc/X11/xorg.conf':
-                            ensure  => present,
-                            content => template("${module_name}/xorg.conf.erb"),
-                            notify  => Service['x11'];
+                        #'/etc/X11/xorg.conf':
+                        #    ensure  => present,
+                        #    content => template("${module_name}/xorg.conf.erb"),
+                        #    notify  => Service['x11'];
                         '/lib/systemd/system/x11.service':
                             content => template("${module_name}/x11.service.erb"),
                             notify  => Service['x11'];
