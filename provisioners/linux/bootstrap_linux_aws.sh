@@ -170,6 +170,7 @@ function get_puppet_repo {
     # Change to puppet dir
     cd "$TMP_PUPPET_DIR" || fail "Failed to change dir"
     chmod 777 .
+    git checkout $PUPPET_BRANCH || fail "Failed to check out branch"
 
     # Inject hiera secrets
     mkdir -p ./data/secrets
