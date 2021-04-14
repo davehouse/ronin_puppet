@@ -30,6 +30,8 @@ workerConfig:
     taskclusterProxyExecutable:       "/usr/local/bin/taskcluster-proxy"
     taskclusterProxyPort:             8080
     tasksDir:                         "<%= @task_dir %>"
+    workerId:                         "<%= @facts['ec2_metadata']['public-hostname'] -%>"
+    workerGroup:                      "<%= @worker_group %>"
     workerType:                       "<%= @worker_type %>"
     wstAudience:                      "firefoxcitc"
     wstServerURL:                     "https://firefoxci-websocktunnel.services.mozilla.com/"
