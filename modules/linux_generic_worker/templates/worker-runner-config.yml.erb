@@ -35,3 +35,8 @@ workerConfig:
     workerType:                       "<%= @worker_type %>"
     wstAudience:                      "firefoxcitc"
     wstServerURL:                     "https://firefoxci-websocktunnel.services.mozilla.com/"
+    workerTypeMetadata:
+        instance_type:                "<%= @facts['ec2_metadata']['instance-type'] -%>"
+        region:                       "<%= @facts['ec2_metadata']['placement']['region'] -%>"
+        ami:                          "<%= @facts['ec2_metadata']['ami-id'] -%>"
+        instance_life_cycle:          "<%= @facts['ec2_metadata']['instance-life-cycle'] -%>"
