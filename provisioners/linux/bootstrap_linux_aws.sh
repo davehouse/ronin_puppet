@@ -17,9 +17,13 @@ set -e
 which puppet || (
 wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet.deb
 dpkg -i /tmp/puppet.deb
-apt-get update
+apt-get -yq update
 apt-get remove -y puppet
 apt-get install -y puppet-agent
+)
+
+which git || (
+apt-get -yq update && apt-get -yq install git
 )
 
 # get clock synced. if clock is way off, run-puppet.sh will never finish
@@ -142,24 +146,26 @@ TMP_PUPPET_DIR=$(mktemp -d /tmp/puppet_working.XXXXXX)
 function get_puppet_repo {
     TMP_DL_DIR=$(mktemp -d -t puppet_download.XXXXXXX)
     [ -d "${TMP_DL_DIR}" ] || fail "Failed to mktemp download dir"
+    rm -rf $TMP_PUPPET_DIR
 
     # Download the puppet repo tarball directly from github
     # We don't use git because some oses don't have git installed by default
     # In the future, we may publish master branch to s3 or some other highly available service since
     # Github has rate limits on downloads.
     while true; do
-        echo "Downloading puppet repo: ${PUPPET_REPO_BUNDLE}"
-        if HTTP_RES_CODE=$(curl -sL "$PUPPET_REPO_BUNDLE" -o "${TMP_DL_DIR}/puppet.tar.gz" -w "%{http_code}") && [[ "$HTTP_RES_CODE" = "200" ]]; then
+        #echo "Downloading puppet repo: ${PUPPET_REPO_BUNDLE}"
+        #if HTTP_RES_CODE=$(curl -sL "$PUPPET_REPO_BUNDLE" -o "${TMP_DL_DIR}/puppet.tar.gz" -w "%{http_code}") && [[ "$HTTP_RES_CODE" = "200" ]]; then
+        if git clone $PUPPET_REPO $TMP_PUPPET_DIR; then
             break
         else
-            echo "Failed to download puppet repo.  Sleep for 30 seconds before trying again"
+            echo "Failed to git clone $PUPPET_REPO.  Sleep for 30 seconds before trying again"
             sleep 30
         fi
     done
     # Extract the puppet repo tarball
-    tar -zxf "${TMP_DL_DIR}/puppet.tar.gz" --strip 1 -C "${TMP_PUPPET_DIR}" || fail "Failed to extract puppet tar.gz"
+    #tar -zxf "${TMP_DL_DIR}/puppet.tar.gz" --strip 1 -C "${TMP_PUPPET_DIR}" || fail "Failed to extract puppet tar.gz"
     # Clean up the download dir
-    rm -rf "${TMP_DL_DIR}"
+    #rm -rf "${TMP_DL_DIR}"
 
     # Change to puppet dir
     cd "$TMP_PUPPET_DIR" || fail "Failed to change dir"
