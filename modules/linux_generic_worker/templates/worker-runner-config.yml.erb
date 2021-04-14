@@ -7,7 +7,7 @@ provider:
     accessToken: "<%= @taskcluster_access_token %>"
     workerPoolID: "releng-hardware/<%= @worker_type %>"
     workerGroup: "<%= @worker_group %>"
-    workerID: "<%= @ec2_metadata.public-hostname %>"
+    workerID: "<%= @{::facts['ec2_metadata']['public-hostname']} -%>"
 worker:
     implementation: generic-worker
     path: /usr/local/bin/generic-worker
@@ -22,7 +22,7 @@ workerConfig:
     livelogExecutable:                "/usr/local/bin/livelog"
     numberOfTasksToRun:               1
     provisionerId:                    "releng-hardware"
-    publicIP:                         "<%= @public_ipaddress %>"
+    publicIP:                         "<%= @{::facts['ec2_metadata']['public-ipv4']} -%>"
     requiredDiskSpaceMegabytes:       20240
     sentryProject:                    "generic-worker"
     shutdownMachineOnIdle:            false
