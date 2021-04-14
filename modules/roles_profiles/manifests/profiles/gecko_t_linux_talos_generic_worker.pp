@@ -13,7 +13,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
         $worker_id = $public_hostname
     }
     else {
-        workerId   = $facts['networking']['hostname']
+        $workerId   = $facts['networking']['hostname']
     }
 
     case $::operatingsystem {
