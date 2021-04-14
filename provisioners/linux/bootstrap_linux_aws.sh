@@ -243,9 +243,9 @@ echo $PUPPET_BIN apply "${PUPPET_OPTIONS[@]}"
 # record the installation date (note that this won't appear anywhere on Darwin)
 echo "System Installed: $(date)" >> /etc/issue
 
-#echo "Success. Rebooting..."
+echo "Success. Rebooting..."
 
 # Success! Let's reboot
-#/sbin/reboot --force &>/dev/null &
+/sbin/reboot --force &>/dev/null &
 
 exit 0
