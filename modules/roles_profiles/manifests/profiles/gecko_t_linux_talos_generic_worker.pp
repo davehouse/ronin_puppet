@@ -13,7 +13,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
         $worker_id = $public_hostname
     }
     else {
-        $worker_id = $facts['hostname']
+        workerId   = $facts['networking']['hostname']
     }
 
     case $::operatingsystem {
@@ -52,7 +52,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
                     workerType    => $worker_type,
                     workerGroup   => $worker_group,
                     provisionerId => 'releng-hardware',
-                    workerId      => $facts['networking']['hostname'],
+                    workerId      => $worker_id,
                 },
             }
 
