@@ -30,7 +30,7 @@ workerConfig:
     taskclusterProxyExecutable:       "/usr/local/bin/taskcluster-proxy"
     taskclusterProxyPort:             8080
     tasksDir:                         "<%= @task_dir %>"
-    workerId:                         "<%= @facts['ec2_metadata']['public-hostname'] -%>"
+    workerId:                         "<%= @worker_id -%>"
     workerGroup:                      "<%= @worker_group %>"
     workerType:                       "<%= @worker_type %>"
     wstAudience:                      "firefoxcitc"
