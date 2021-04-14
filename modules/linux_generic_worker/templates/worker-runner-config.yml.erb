@@ -7,7 +7,7 @@ provider:
     accessToken: "<%= @taskcluster_access_token %>"
     workerPoolID: "releng-hardware/<%= @worker_type %>"
     workerGroup: "<%= @worker_group %>"
-    workerID: "<%= @hostname %>"
+    workerID: "<%= @ec2_metadata.public-hostname %>"
 worker:
     implementation: generic-worker
     path: /usr/local/bin/generic-worker
