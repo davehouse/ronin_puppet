@@ -28,10 +28,10 @@ class linux_talos () {
         ensure => latest
       }
 
-      kernelmodule {
-        'v4l2loopback':
-          packages => ['v4l2loopback-dkms'];
-      }
+      #kernelmodule {
+      #  'v4l2loopback':
+      #    packages => ['v4l2loopback-dkms'];
+      #}
 
       # directories expected by talos
       file {
