@@ -61,7 +61,7 @@ class roles_profiles::profiles::cltbld_user {
                 ensure => directory,
             }
 
-            $sudo_commands = ['/sbin/reboot']
+            $sudo_commands = ['/sbin/reboot','/sbin/shutdown']
             $sudo_commands.each |String $command| {
                 sudo::custom { "allow_cltbld_${command}":
                     user    => 'cltbld',
