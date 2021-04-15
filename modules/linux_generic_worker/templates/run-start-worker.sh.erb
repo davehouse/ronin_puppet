@@ -62,6 +62,11 @@ fi
 export TASKCLUSTER_CLIENT_ID="<%= @quarantine_client_id %>"
 export TASKCLUSTER_ACCESS_TOKEN="<%= @quarantine_access_token %>"
 
+if [ $exitstatus -eq 68 ]; then
+    echo "Worker idle. Sleep 60s then shutdown"
+    sudo shutdown now
+fi
+
 if [ $exitstatus -eq 69 ]; then
 # If generic-worker considers that the host environment is in an invalid/corrupted
 # state (for example, it cannot write to disk), it will return the exit code 69.
