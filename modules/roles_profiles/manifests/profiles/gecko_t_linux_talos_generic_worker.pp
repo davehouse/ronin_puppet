@@ -7,7 +7,13 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
     # TODO: make these args to this module and use in call in gecko_t_linux_talos?
     $instance_type = regsubst($facts['ec2_metadata']['instance-type'], '\.', '-', 'G')
     $worker_type  = "gecko-t-linux-talos-${instance_type}"
-    $worker_group = regsubst($facts['networking']['fqdn'], '^(.*\.releng|ip-.*)\.([^\.]+)\.(mozilla|compute)\..*', '\2')
+    $cloud_group = regsubst($facts['networking']['fqdn'], '^(.*\.releng|ip-.*)\.([^\.]+)\.(mozilla|compute)\..*', '\2')
+    if $cloud_group =~ /^ip-.*ec2\.internal$/ {
+        $worker_group = 'us-east'
+    }
+    else {
+        $worker_group = $cloud_group
+    }
     $worker_id = $facts['ec2_metadata']['instance-id']
 
     case $::operatingsystem {
