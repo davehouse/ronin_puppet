@@ -97,10 +97,12 @@ class roles_profiles::profiles::cltbld_user {
                     ensure => absent;
             }
 
-            sudo::custom { 'allow_cltbld_reboot':
-                user    => 'cltbld',
-                command => '/sbin/reboot',
-            }
+            $sudo_commands = ['/sbin/reboot','/sbin/shutdown']
+            $sudo_commands.each |String $command| {
+                sudo::custom { "allow_cltbld_${command}":
+                    user    => 'cltbld',
+                    command => $command,
+                }
         }
         default: {
             fail("${::operatingsystem} not supported")
