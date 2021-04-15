@@ -9,7 +9,7 @@ class roles_profiles::profiles::gecko_t_linux_talos_generic_worker {
     $worker_type  = "gecko-t-linux-talos-${instance_type}"
     $cloud_group = regsubst($facts['networking']['fqdn'], '^(.*\.releng|ip-.*)\.([^\.]+)\.(mozilla|compute)\..*', '\2')
     if $cloud_group =~ /^ip-.*ec2\.internal$/ {
-        $worker_group = 'us-east'
+        $worker_group = $facts['ec2_metadata']['placement']['region']
     }
     else {
         $worker_group = $cloud_group
