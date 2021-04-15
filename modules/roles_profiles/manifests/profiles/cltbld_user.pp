@@ -103,6 +103,7 @@ class roles_profiles::profiles::cltbld_user {
                     user    => 'cltbld',
                     command => $command,
                 }
+            }
         }
         default: {
             fail("${::operatingsystem} not supported")
