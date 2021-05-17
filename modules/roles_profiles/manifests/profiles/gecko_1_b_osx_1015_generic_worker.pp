@@ -105,7 +105,7 @@ class roles_profiles::profiles::gecko_1_b_osx_1015_generic_worker {
             #    mode   => '0755',
             #}
 
-            packages::xcode_cmd_line_tools {
+            class { 'packages::xcode_cmd_line_tools':
                 version => '12.2',
             }
 
