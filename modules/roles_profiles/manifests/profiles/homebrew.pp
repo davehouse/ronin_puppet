@@ -17,6 +17,6 @@ class roles_profiles::profiles::homebrew (
             multiuser => true,
             #require   => Class['packages::xcode_cmd_line_tools'],
         }
-        Class['packages::xcode_cmd_line_tools'] -> roles_profiles::profiles::homebrew
+        Class['packages::xcode_cmd_line_tools'] -> CLass['roles_profiles::profiles::homebrew']
     }
 }
