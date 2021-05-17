@@ -4,7 +4,14 @@
 
 class mercurial::cacert {
 
-    file { "${::mercurial::settings::hgrc_parentdir}/cacert.pem":
+    #include dirs::builds
+
+    file {
+        '/builds/mercurial-certs':
+            ensure => directory,
+            mode   => '0755';
+
+        '/builds/mercurial-certs/cacert.pem':
             ensure => file,
             source => 'puppet:///modules/mercurial/cacert.pem',
             owner  => 'root';
