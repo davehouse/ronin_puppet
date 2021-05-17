@@ -10,8 +10,10 @@ class fluentd (
     String $stackdriver_clientid = '',
     String $syslog_host          = lookup('papertrail.host', {'default_value' => ''}),
     Integer $syslog_port         = lookup('papertrail.port', {'default_value' => 514}),
-    String $mac_log_level        = 'default',
+    String $mac_log_level        = '17',
     Boolean $tail_worker_logs    = false,
+    String $worker_stdout        = '/var/opt/generic-worker/service.stdout.log',
+    String $worker_stderr        = '/var/opt/generic-worker/service.stderr.log',
 ) {
 
     include shared
@@ -54,6 +56,7 @@ class fluentd (
                 '/etc/td-agent/td-agent.conf':
                     ensure  => present,
                     content => template('fluentd/fluentd.conf.erb'),
+                    notify  => Service['td-agent'],
                     mode    => '0644';
 
                 '/var/log/td-agent':
@@ -62,9 +65,9 @@ class fluentd (
             }
 
             service { 'td-agent':
-                ensure  => running,
-                enable  => true,
-                require => File['/Library/LaunchDaemons/td-agent.plist'],
+                ensure    => running,
+                enable    => true,
+                subscribe => File['/Library/LaunchDaemons/td-agent.plist'],
             }
 
         }

@@ -11,7 +11,7 @@ class packages::mercurial (
 
     packages::macos_package_from_s3 { "Mercurial-${version}-macosx10.14.pkg":
         private             => false,
-        os_version_specific => false,
+        os_version_specific => true,
         type                => 'pkg',
     }
 
@@ -21,9 +21,12 @@ class packages::mercurial (
     # but installs them in:
     # /Library/Python/2.7/site-packages/
     # So, link /Library under /usr to make hg find it.
-    file { '/usr/Library':
-        ensure  => 'link',
-        target  => '/Library',
-        require => Class['packages::python2'];
+    # Not needed for bigsur on M1
+    if ! member(['10.15', '11.0', '11.1', '11.2'], $facts['os']['macosx']['version']['major']) {
+        file { '/usr/Library':
+            ensure  => 'link',
+            target  => '/Library',
+            require => Class['packages::python2'];
+        }
     }
 }

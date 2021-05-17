@@ -10,10 +10,13 @@ mod 'puppet-windows_firewall', '2.0.2'
 mod 'puppetlabs-acl', '2.1.0'
 mod 'puppetlabs-apt', '6.1.1'
 mod 'puppetlabs-concat', '5.1.0'
+mod 'puppetlabs-facts', '1.4.0'
 mod 'puppetlabs-firewall', '1.14.0'
+mod 'puppetlabs-inifile', '5.0.1'
 mod 'puppetlabs-motd', '2.1.1'
 mod 'puppetlabs-ntp', '7.3.0'
 mod 'puppetlabs-powershell', '2.2.0'
+mod 'puppetlabs-puppet_agent', '4.6.1'
 mod 'puppetlabs-registry', '2.1.0'
 mod 'puppetlabs-scheduled_task', '1.0.1'
 mod 'puppetlabs-stdlib', '5.1.0'
@@ -28,4 +31,4 @@ mod 'mac_profiles_handler',
 
 mod 'hiera_vault',
   :git => "https://github.com/petems/petems-hiera_vault.git",
-  :commit => 'a99fe47233a6033bbe86f7940e8842be8eaf3254'
+  :commit => '4376028fd137c62c856a4168f2698bd5930117c6'
